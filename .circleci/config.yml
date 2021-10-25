@@ -15,6 +15,9 @@ parameters:
   run-module-b:
     type: boolean
     default: false
+  run-module-c:
+    type: boolean
+    default: false    
 
 jobs:
   module-a:
@@ -38,7 +41,15 @@ jobs:
     steps:
       - run: "echo 'Continuing module B'"
       - run: env
-
+      
+  module-c:
+    docker:
+      - image: alpine
+    steps:
+      - checkout
+      - run: "echo 'Hello from module C!'"
+      - run: cat module-c/README.md
+      
 workflows:
   pre:
     when: << pipeline.parameters.run-setup >>
@@ -53,6 +64,8 @@ workflows:
             .* run-setup false
             module-a/.* run-module-a true
             module-b/.* run-module-b true
+            module-c/.* run-module-c true
+            
   module-a:
     when: << pipeline.parameters.run-module-a >>
     jobs:
@@ -64,3 +77,7 @@ workflows:
       - module-b-post:
           requires:
             - module-b
+  module-c:
+    when: << pipeline.parameters.run-module-c >>
+    jobs:
+      - module-c            
